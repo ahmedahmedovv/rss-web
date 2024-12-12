@@ -39,12 +39,27 @@
             margin: 4px 0;
             border-radius: 6px;
         }
-        .category-filter:hover {
+        .category-filter:nth-child(odd) {
             background-color: #f6f8fa;
         }
+        .category-filter:nth-child(even) {
+            background-color: white;
+        }
+        .category-filter:hover {
+            background-color: #edf2f7;
+        }
         .category-filter.active {
-            background-color: #fbeede;
+            background-color: #fbeede !important;
             font-weight: bold;
+        }
+        .article-box {
+            transition: opacity 0.3s ease;
+        }
+        .article-box.read {
+            opacity: 0.6;
+        }
+        .article-box.read .Box-header {
+            background-color: #f6f8fa;
         }
     </style>
 </head>
@@ -128,6 +143,16 @@
         $(document).ready(function() {
             let allArticles = [];
             let categories = new Set();
+            let readArticles = new Set(JSON.parse(localStorage.getItem('readArticles') || '[]'));
+
+            function isArticleRead(link) {
+                return readArticles.has(link);
+            }
+
+            function markAsRead(link) {
+                readArticles.add(link);
+                localStorage.setItem('readArticles', JSON.stringify(Array.from(readArticles)));
+            }
 
             function updateCategoryFilters() {
                 let categoriesHtml = `
@@ -136,7 +161,7 @@
                     </div>
                 `;
                 
-                categories.forEach(category => {
+                Array.from(categories).sort().forEach(category => {
                     categoriesHtml += `
                         <div class="category-filter" data-category="${category}">
                             ${category}
@@ -159,7 +184,6 @@
                 let articlesHtml = '';
                 
                 articles.forEach(article => {
-                    // Format the date
                     let formattedDate = 'Not available';
                     if (article.optimized_at) {
                         const date = new Date(article.optimized_at);
@@ -170,8 +194,10 @@
                         });
                     }
 
+                    const isRead = isArticleRead(article.link);
+                    
                     articlesHtml += `
-                        <div class="Box mb-3">
+                        <div class="Box mb-3 article-box ${isRead ? 'read' : ''}" data-link="${article.link}">
                             <div class="Box-header d-flex flex-items-center">
                                 <h3 class="Box-title flex-auto">
                                     <a href="${article.link}" class="Link--primary" target="_blank">
@@ -219,6 +245,37 @@
                 $('.category-filter').removeClass('active');
                 $(this).addClass('active');
                 filterArticles($(this).data('category'));
+            });
+
+            // Add click handlers for marking as read
+            $(document).on('click', '.article-box', function(e) {
+                const link = $(this).data('link');
+                $(this).addClass('read');
+                markAsRead(link);
+            });
+
+            // Handle link clicks separately to prevent double-triggering
+            $(document).on('click', '.article-box a', function(e) {
+                e.stopPropagation();
+                const link = $(this).attr('href');
+                $(this).closest('.article-box').addClass('read');
+                markAsRead(link);
+            });
+
+            // Add clear read history button to sidebar
+            $('#categories-list').append(`
+                <div class="border-top pt-2 mt-2">
+                    <button class="btn btn-sm btn-danger" id="clearReadHistory">
+                        Clear Read History
+                    </button>
+                </div>
+            `);
+
+            // Clear read history handler
+            $('#clearReadHistory').click(function() {
+                readArticles.clear();
+                localStorage.removeItem('readArticles');
+                $('.article-box').removeClass('read');
             });
         });
 <<<<<<< HEAD
