@@ -299,6 +299,7 @@
                 }
                 
                 renderArticles(filteredArticles);
+                updateVisibleArticles();
             }
 
             function renderArticles(articles) {
@@ -481,6 +482,68 @@
                     updateCategoryFilters();
                 }, 800);
             }
+
+            // Add keyboard navigation
+            let currentArticleIndex = -1;
+            let visibleArticles = [];
+
+            function updateVisibleArticles() {
+                visibleArticles = $('.article-box:visible').toArray();
+                currentArticleIndex = -1;
+            }
+
+            function scrollToArticle(article) {
+                if (article) {
+                    $(article)[0].scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                    // Add visual feedback for current selection
+                    $('.article-box').removeClass('border-green');
+                    $(article).addClass('border-green');
+                    
+                    // Mark article as read
+                    const $article = $(article);
+                    const link = $article.data('link');
+                    $article.addClass('read');
+                    markAsRead(link);
+                }
+            }
+
+            // Add keyboard event listener
+            $(document).keydown(function(e) {
+                // Only handle 'n' and 'k' keys when not in input fields
+                if (!$(e.target).is('input, textarea')) {
+                    if (e.key === 'n') {
+                        e.preventDefault();
+                        if (currentArticleIndex === -1) {
+                            updateVisibleArticles();
+                            currentArticleIndex = 0;
+                        } else {
+                            currentArticleIndex = Math.min(currentArticleIndex + 1, visibleArticles.length - 1);
+                        }
+                        scrollToArticle(visibleArticles[currentArticleIndex]);
+                    } else if (e.key === 'k') {
+                        e.preventDefault();
+                        if (currentArticleIndex === -1) {
+                            updateVisibleArticles();
+                            currentArticleIndex = visibleArticles.length - 1;
+                        } else {
+                            currentArticleIndex = Math.max(currentArticleIndex - 1, 0);
+                        }
+                        scrollToArticle(visibleArticles[currentArticleIndex]);
+                    }
+                }
+            });
+
+            // Add CSS for selected article
+            $('head').append(`
+                <style>
+                    .border-green {
+                        border: 2px solid #2ea44f !important;
+                    }
+                </style>
+            `);
         });
     </script>
 </body>
