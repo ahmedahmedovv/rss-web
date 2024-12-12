@@ -400,30 +400,14 @@
                 updateCategoryFilters();
             });
 
-            // Add handler for mark all checkbox
+            // Update the mark all checkbox handler
             $('#markAllRead').change(function() {
                 const isChecked = $(this).is(':checked');
                 const currentCategory = $('.category-filter.active').data('category');
                 
-                if (currentCategory) {
-                    const categoryArticles = allArticles.filter(article => 
-                        article.category === decodeHtml(currentCategory)
-                    );
-                    
-                    if (isChecked) {
-                        // Mark all visible articles as read
-                        categoryArticles.forEach(article => {
-                            markAsRead(article.link);
-                            $(`.article-box[data-link="${article.link}"]`).addClass('read');
-                        });
-                    }
+                if (currentCategory && isChecked) {
+                    markAllAsRead(currentCategory);
                 }
-                
-                // Reset checkbox after operation
-                $(this).prop('checked', false);
-                
-                // Update category counts
-                updateCategoryFilters();
             });
 
             // Add some CSS styles
@@ -446,30 +430,42 @@
             function markAllAsRead(category) {
                 const decodedCategory = decodeHtml(category);
                 
-                // Show loading state
-                const $checkbox = $('#markAllRead');
-                const $span = $checkbox.next('span');
-                const originalText = $span.text();
-                $checkbox.prop('disabled', true);
-                $span.text('Marking as read...');
+                // Add loading overlay to main content
+                const $articlesContainer = $('#articles');
+                $articlesContainer.prepend(`
+                    <div id="marking-overlay" class="position-absolute top-0 left-0 width-full height-full d-flex flex-column flex-items-center flex-justify-center" style="background: rgba(255,255,255,0.8); z-index: 100;">
+                        <div class="Spinner"></div>
+                        <p class="mt-2">Marking articles as read...</p>
+                    </div>
+                `);
+                $articlesContainer.css('position', 'relative');
                 
-                // Mark all articles as read
+                // Mark all articles as read in memory
                 const categoryArticles = allArticles.filter(article => 
                     article.category === decodedCategory
                 );
                 
+                // First update visual state of articles
                 categoryArticles.forEach(article => {
-                    markAsRead(article.link);
                     $(`.article-box[data-link="${article.link}"]`).addClass('read');
                 });
                 
-                // Reset UI after short delay
+                // Remove loading overlay and update sidebar after delay
                 setTimeout(() => {
-                    $checkbox.prop('disabled', false);
-                    $span.text(originalText);
-                    $checkbox.prop('checked', false);
+                    // Update read status in storage
+                    categoryArticles.forEach(article => {
+                        markAsRead(article.link);
+                    });
+                    
+                    $('#marking-overlay').fadeOut(300, function() {
+                        $(this).remove();
+                        $articlesContainer.css('position', '');
+                    });
+                    $('#markAllRead').prop('checked', false);
+                    
+                    // Update sidebar counts only after animation
                     updateCategoryFilters();
-                }, 500);
+                }, 800);
             }
         });
 <<<<<<< HEAD
