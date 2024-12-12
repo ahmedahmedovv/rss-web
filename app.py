@@ -1,21 +1,92 @@
 from flask import Flask, render_template, jsonify
 import requests
+from flask_caching import Cache
+from datetime import datetime
+import logging
+import os
+from logging.handlers import RotatingFileHandler
 
 app = Flask(__name__)
 
+# Create logs directory if it doesn't exist
+if not os.path.exists('logs'):
+    os.makedirs('logs')
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('rss_app')
+logger.setLevel(logging.INFO)
+
+# Create handlers
+file_handler = RotatingFileHandler('logs/app.log', maxBytes=10240, backupCount=5)
+console_handler = logging.StreamHandler()
+
+# Create formatters and add it to handlers
+log_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(log_format)
+console_handler.setFormatter(log_format)
+
+# Add handlers to the logger
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)
+
+# Cache Configuration
+cache_config = {
+    "CACHE_TYPE": "SimpleCache",
+    "CACHE_DEFAULT_TIMEOUT": 300
+}
+app.config.from_mapping(cache_config)
+cache = Cache(app)
+
 @app.route('/')
 def index():
+    logger.info('Accessing home page')
     return render_template('index.html')
 
 @app.route('/get_articles')
+@cache.cached(timeout=300)
 def get_articles():
     url = "https://raw.githubusercontent.com/ahmedahmedovv/rss-ai-category/refs/heads/main/data/categorized_articles.json"
     try:
+        logger.info('Fetching articles from external API')
         response = requests.get(url)
+        response.raise_for_status()  # Raises an HTTPError for bad responses
         data = response.json()
-        return jsonify(data)
+        
+        logger.info(f'Successfully fetched {len(data)} articles')
+        return jsonify({
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "data": data
+        })
+    except requests.exceptions.RequestException as e:
+        logger.error(f'Error fetching articles: {str(e)}')
+        return jsonify({"error": "Failed to fetch articles"}), 500
+    except ValueError as e:
+        logger.error(f'Error parsing JSON response: {str(e)}')
+        return jsonify({"error": "Invalid data received from server"}), 500
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        logger.error(f'Unexpected error: {str(e)}')
+        return jsonify({"error": "An unexpected error occurred"}), 500
+
+@app.route('/clear_cache')
+def clear_cache():
+    try:
+        cache.delete('get_articles')
+        logger.info('Cache cleared successfully')
+        return jsonify({"message": "Cache cleared successfully"})
+    except Exception as e:
+        logger.error(f'Error clearing cache: {str(e)}')
+        return jsonify({"error": "Failed to clear cache"}), 500
+
+@app.errorhandler(404)
+def not_found_error(error):
+    logger.error(f'Page not found: {request.url}')
+    return jsonify({"error": "Page not found"}), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    logger.error(f'Server Error: {error}')
+    return jsonify({"error": "Internal server error"}), 500
 
 @app.route('/mark_category_read', methods=['POST'])
 def mark_category_read():
@@ -49,4 +120,5 @@ def mark_category_read():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
+    logger.info('Starting Flask application')
     app.run(debug=True)

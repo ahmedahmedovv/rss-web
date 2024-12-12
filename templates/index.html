@@ -84,11 +84,17 @@
             $.ajax({
                 url: '/get_articles',
                 method: 'GET',
-                success: function(data) {
+                success: function(response) {
                     $('#loading').hide();
                     let articlesHtml = '';
                     
-                    data.forEach(article => {
+                    articlesHtml += `
+                        <div class="flash flash-success mb-3">
+                            Last updated: ${response.timestamp}
+                        </div>
+                    `;
+                    
+                    response.data.forEach(article => {
                         articlesHtml += `
                             <div class="Box mb-3">
                                 <div class="Box-header">
