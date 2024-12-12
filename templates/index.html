@@ -186,7 +186,24 @@
                             </a>
                             {% endif %}
                             
-                            {% for p in range(1, total_pages + 1) %}
+                            {# Always show first page #}
+                            {% if current_page > 3 %}
+                                <a href="/?{{ urlencode(dict(
+                                    category=selected_category,
+                                    sort=sort_order,
+                                    page=1
+                                ) | dict_filter) }}" 
+                                   class="btn BtnGroup-item">1</a>
+                                {% if current_page > 4 %}
+                                    <span class="btn BtnGroup-item">...</span>
+                                {% endif %}
+                            {% endif %}
+                            
+                            {# Show pages around current page #}
+                            {% for p in range(
+                                [current_page - 2, 1]|max,
+                                [current_page + 3, total_pages + 1]|min
+                            ) %}
                                 {% if p == current_page %}
                                     <span class="btn BtnGroup-item selected">{{ p }}</span>
                                 {% else %}
@@ -195,11 +212,22 @@
                                         sort=sort_order,
                                         page=p
                                     ) | dict_filter) }}" 
-                                       class="btn BtnGroup-item">
-                                        {{ p }}
-                                    </a>
+                                       class="btn BtnGroup-item">{{ p }}</a>
                                 {% endif %}
                             {% endfor %}
+                            
+                            {# Always show last page #}
+                            {% if current_page < total_pages - 2 %}
+                                {% if current_page < total_pages - 3 %}
+                                    <span class="btn BtnGroup-item">...</span>
+                                {% endif %}
+                                <a href="/?{{ urlencode(dict(
+                                    category=selected_category,
+                                    sort=sort_order,
+                                    page=total_pages
+                                ) | dict_filter) }}" 
+                                   class="btn BtnGroup-item">{{ total_pages }}</a>
+                            {% endif %}
                             
                             {% if current_page < total_pages %}
                             <a href="/?{{ urlencode(dict(
