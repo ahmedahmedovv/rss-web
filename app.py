@@ -46,9 +46,8 @@ app.config['API_URL'] = API_URL
 def index():
     logger.info('Accessing home page')
     try:
-        # Fetch articles from the API
-        url = "https://raw.githubusercontent.com/ahmedahmedovv/rss-ai-category/refs/heads/main/data/categorized_articles.json"
-        response = requests.get(url)
+        # Fetch articles from the API using configured URL
+        response = requests.get(app.config['API_URL'])
         response.raise_for_status()
         articles = response.json()
         
@@ -79,10 +78,9 @@ def index():
 @app.route('/get_articles')
 @cache.cached(timeout=300)
 def get_articles():
-    url = "https://raw.githubusercontent.com/ahmedahmedovv/rss-ai-category/refs/heads/main/data/categorized_articles.json"
     try:
         logger.info('Fetching articles from external API')
-        response = requests.get(url)
+        response = requests.get(app.config['API_URL'])
         response.raise_for_status()  # Raises an HTTPError for bad responses
         data = response.json()
         
@@ -127,8 +125,8 @@ def mark_category_read():
         data = request.json
         category = data.get('category')
         
-        # Get all articles
-        response = requests.get("https://raw.githubusercontent.com/ahmedahmedovv/rss-ai-category/refs/heads/main/data/categorized_articles.json")
+        # Get all articles using configured URL
+        response = requests.get(app.config['API_URL'])
         response.raise_for_status()
         data = response.json()
         all_articles = data if isinstance(data, list) else data.get('articles', [])
