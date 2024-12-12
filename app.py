@@ -19,9 +19,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+DATABASE_URL = os.environ.get('DATABASE_URL', 'articles.db')
+
 def init_db():
     try:
-        conn = sqlite3.connect('articles.db')
+        conn = sqlite3.connect(DATABASE_URL)
         c = conn.cursor()
         c.execute('''CREATE TABLE IF NOT EXISTS read_articles
                     (article_link TEXT PRIMARY KEY)''')
@@ -37,7 +39,7 @@ def before_request():
     init_db()
 
 def get_read_articles():
-    conn = sqlite3.connect('articles.db')
+    conn = sqlite3.connect(DATABASE_URL)
     c = conn.cursor()
     c.execute('SELECT article_link FROM read_articles')
     read_articles = {row[0] for row in c.fetchall()}
@@ -62,7 +64,7 @@ def toggle_read():
     data = request.json
     article_link = data.get('link')
     
-    conn = sqlite3.connect('articles.db')
+    conn = sqlite3.connect(DATABASE_URL)
     c = conn.cursor()
     
     c.execute('SELECT 1 FROM read_articles WHERE article_link = ?', (article_link,))

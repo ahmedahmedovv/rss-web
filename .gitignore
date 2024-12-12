@@ -36,3 +36,9 @@ ENV/
 # OS
 .DS_Store
 Thumbs.db 
+
+# Environment Variables
+.env
+
+# Logs
+app.log 
