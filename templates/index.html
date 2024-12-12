@@ -7,62 +7,62 @@
     <link href="https://unpkg.com/@primer/css@^20.2.4/dist/primer.css" rel="stylesheet" />
     <style>
         body {
-            background-color: #f4f1e8; /* Light cream paper color */
+            background-color: #fbeede; /* New base color */
         }
         
         .article-box {
             cursor: pointer;
             transition: background-color 0.3s, border-left 0.3s;
             border-left: 4px solid transparent;
-            background-color: #fff; /* Clean white paper */
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            background-color: #fff9f0; /* Lighter shade */
+            box-shadow: 0 1px 3px rgba(139, 119, 95, 0.1);
         }
         
         .article-box:hover {
-            background-color: #fffdf7; /* Warm white hover */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+            background-color: #fffaf3; /* Slightly lighter warm white */
+            box-shadow: 0 2px 5px rgba(139, 119, 95, 0.15);
         }
         
         .article-box.read {
-            background-color: #e8e6e1; /* Aged paper color */
-            border-left: 4px solid #a39e93; /* Darker paper edge */
+            background-color: #f5e7d7; /* Muted warm tone */
+            border-left: 4px solid #d4b595; /* Darker warm accent */
         }
         
         .article-box.read h3 a {
-            color: #6b665e !important; /* Muted ink color */
+            color: #a08b6e !important; /* Muted warm brown */
             text-decoration: line-through;
         }
         
         .article-box.read .color-fg-muted {
-            color: #847f77 !important; /* Aged ink color */
+            color: #b39f84 !important; /* Softer warm brown */
         }
         
         .Box {
-            background-color: #fff;
-            border-color: #d5d0c5;
+            background-color: #fff9f0;
+            border-color: #e6d5bc;
         }
         
         .SideNav {
-            background-color: #fff;
+            background-color: #fff9f0;
             border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(139, 119, 95, 0.1);
         }
         
         .SideNav-item {
-            border-bottom: 1px solid #e8e6e1;
+            border-bottom: 1px solid #f5e7d7;
         }
         
         .SideNav-item:hover {
-            background-color: #fffdf7;
+            background-color: #fffaf3;
         }
         
         .SideNav-item.selected {
-            background-color: #e8e6e1;
-            border-left: 4px solid #a39e93;
+            background-color: #f5e7d7;
+            border-left: 4px solid #d4b595;
         }
         
         .BtnGroup-item.selected {
-            background-color: #0366d6;
+            background-color: #c4a17d; /* Warm accent color */
             color: white;
         }
         
@@ -76,20 +76,20 @@
         }
         
         .Pagination .BtnGroup-item {
-            border: 1px solid #d5d0c5;
+            border: 1px solid #e6d5bc;
             padding: 5px 10px;
-            color: #24292e;
-            background-color: #fff;
+            color: #7d6548;
+            background-color: #fff9f0;
         }
         
         .Pagination .BtnGroup-item.selected {
-            background-color: #0366d6;
+            background-color: #c4a17d;
             color: white;
-            border-color: #0366d6;
+            border-color: #c4a17d;
         }
         
         .Pagination .BtnGroup-item:hover:not(.selected) {
-            background-color: #f6f8fa;
+            background-color: #fffaf3;
             text-decoration: none;
         }
     </style>
@@ -268,6 +268,38 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.article-box').forEach(box => {
+            // Get the link element within the box
+            const linkElement = box.querySelector('a');
+            
+            // Add click handler for the link
+            linkElement.addEventListener('click', async function(event) {
+                // Don't stop propagation - let the link open in new tab
+                const link = box.dataset.link;
+                
+                try {
+                    const response = await fetch('/toggle_read', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ link: link })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.is_read) {
+                        box.classList.add('read');
+                    } else {
+                        box.classList.remove('read');
+                    }
+                    
+                    // Update counts after toggling read status
+                    await updateCounts();
+                } catch (error) {
+                    console.error('Error toggling read state:', error);
+                }
+            });
+
+            // Keep the existing box click handler
             box.addEventListener('click', async function() {
                 const link = this.dataset.link;
                 
