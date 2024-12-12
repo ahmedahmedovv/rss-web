@@ -6,24 +6,59 @@
     <title>RSS Articles</title>
     <link href="https://unpkg.com/@primer/css@^20.2.4/dist/primer.css" rel="stylesheet" />
     <style>
+        body {
+            background-color: #f4f1e8; /* Light cream paper color */
+        }
+        
         .article-box {
             cursor: pointer;
             transition: background-color 0.3s, border-left 0.3s;
             border-left: 4px solid transparent;
+            background-color: #fff; /* Clean white paper */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
+        
         .article-box:hover {
-            background-color: #f1f8ff;
+            background-color: #fffdf7; /* Warm white hover */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
         }
+        
         .article-box.read {
-            background-color: #eef1f3;
-            border-left: 4px solid #6e7781;
+            background-color: #e8e6e1; /* Aged paper color */
+            border-left: 4px solid #a39e93; /* Darker paper edge */
         }
+        
         .article-box.read h3 a {
-            color: #57606a !important;
+            color: #6b665e !important; /* Muted ink color */
             text-decoration: line-through;
         }
+        
         .article-box.read .color-fg-muted {
-            color: #6e7781 !important;
+            color: #847f77 !important; /* Aged ink color */
+        }
+        
+        .Box {
+            background-color: #fff;
+            border-color: #d5d0c5;
+        }
+        
+        .SideNav {
+            background-color: #fff;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .SideNav-item {
+            border-bottom: 1px solid #e8e6e1;
+        }
+        
+        .SideNav-item:hover {
+            background-color: #fffdf7;
+        }
+        
+        .SideNav-item.selected {
+            background-color: #e8e6e1;
+            border-left: 4px solid #a39e93;
         }
     </style>
 </head>
