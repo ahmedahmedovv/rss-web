@@ -8,13 +8,22 @@
     <style>
         .article-box {
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: background-color 0.3s, border-left 0.3s;
+            border-left: 4px solid transparent;
+        }
+        .article-box:hover {
+            background-color: #f1f8ff;
         }
         .article-box.read {
-            background-color: #f6f8fa;
+            background-color: #eef1f3;
+            border-left: 4px solid #6e7781;
         }
         .article-box.read h3 a {
-            color: #666 !important;
+            color: #57606a !important;
+            text-decoration: line-through;
+        }
+        .article-box.read .color-fg-muted {
+            color: #6e7781 !important;
         }
     </style>
 </head>
