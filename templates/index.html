@@ -127,11 +127,15 @@
             <div class="Box-header">
                 <h3 class="Box-title">Categories</h3>
             </div>
-            <div class="Box-body" id="categories-list">
-                <div class="category-filter active" data-category="all">
-                    All Categories
-                    <span class="category-count">${getUnreadCount('all')}</span>
+            <div class="Box-body">
+                <div class="form-checkbox mb-2">
+                    <label>
+                        <input type="checkbox" id="showOnlyUnread" checked>
+                        Show only unread
+                    </label>
                 </div>
+            </div>
+            <div class="Box-body" id="categories-list">
                 <!-- Categories will be populated dynamically -->
             </div>
 >>>>>>> 5d93fd3 (v16)
@@ -157,6 +161,7 @@
             let allArticles = [];
             let categories = new Set();
             let readArticles = new Set(JSON.parse(localStorage.getItem('readArticles') || '[]'));
+            let showOnlyUnread = $('#showOnlyUnread').is(':checked');
 
             function isArticleRead(link) {
                 return readArticles.has(link);
@@ -169,9 +174,6 @@
             }
 
             function getUnreadCount(category) {
-                if (category === 'all') {
-                    return allArticles.filter(article => !isArticleRead(article.link)).length;
-                }
                 return allArticles.filter(article => 
                     article.category === category && !isArticleRead(article.link)
                 ).length;
@@ -187,15 +189,13 @@
             }
 
             function updateCategoryFilters() {
-                let categoriesHtml = `
-                    <div class="category-filter active" data-category="all">
-                        All Categories
-                        <span class="category-count">${getUnreadCount('all')}</span>
-                    </div>
-                `;
+                let categoriesHtml = '';
                 
                 Array.from(categories).sort().forEach(category => {
                     const unreadCount = getUnreadCount(category);
+                    if (showOnlyUnread && unreadCount === 0) {
+                        return;
+                    }
                     const escapedCategory = escapeHtml(category);
                     categoriesHtml += `
                         <div class="category-filter" data-category="${escapedCategory}">
@@ -209,9 +209,12 @@
             }
 
             function filterArticles(category) {
-                let filteredArticles = category === 'all' 
-                    ? allArticles 
-                    : allArticles.filter(article => article.category === decodeHtml(category));
+                const decodedCategory = decodeHtml(category);
+                let filteredArticles = allArticles.filter(article => article.category === decodedCategory);
+                
+                if (showOnlyUnread) {
+                    filteredArticles = filteredArticles.filter(article => !isArticleRead(article.link));
+                }
                 
                 renderArticles(filteredArticles);
             }
@@ -265,13 +268,12 @@
                     $('#loading').hide();
                     allArticles = response.data;
                     
-                    // Extract unique categories
                     allArticles.forEach(article => {
                         categories.add(article.category);
                     });
                     
                     updateCategoryFilters();
-                    renderArticles(allArticles);
+                    $('#articles').html('');
                 },
                 error: function(xhr, status, error) {
                     $('#loading').hide();
@@ -319,6 +321,14 @@
                 readArticles.clear();
                 localStorage.removeItem('readArticles');
                 $('.article-box').removeClass('read');
+                updateCategoryFilters();
+            });
+
+            // Update the toggle handler
+            $('#showOnlyUnread').change(function() {
+                showOnlyUnread = $(this).is(':checked');
+                const currentCategory = $('.category-filter.active').data('category');
+                filterArticles(currentCategory);
                 updateCategoryFilters();
             });
         });
