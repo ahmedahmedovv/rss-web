@@ -166,8 +166,9 @@
     <div class="d-flex">
         <!-- Sidebar -->
         <div class="sidebar Box">
-            <div class="Box-header">
-                <h3 class="Box-title">Categories</h3>
+            <div class="Box-header d-flex flex-items-center">
+                <h3 class="Box-title flex-auto">Categories</h3>
+                <span class="Counter" id="total-unread-count">0</span>
             </div>
             <div class="Box-body">
                 <div class="toggle-container">
@@ -243,6 +244,11 @@
                     .replace(/'/g, "&#039;");
             }
 
+            function updateTotalUnreadCount() {
+                const totalUnread = allArticles.filter(article => !isArticleRead(article.link)).length;
+                $('#total-unread-count').text(totalUnread);
+            }
+
             function updateCategoryFilters() {
                 let categoriesHtml = '';
                 
@@ -261,6 +267,7 @@
                 });
                 
                 $('#categories-list').html(categoriesHtml);
+                updateTotalUnreadCount();
             }
 
             function filterArticles(category) {

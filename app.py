@@ -38,6 +38,10 @@ cache_config = {
 app.config.from_mapping(cache_config)
 cache = Cache(app)
 
+# Move the hardcoded URL to configuration
+API_URL = "https://raw.githubusercontent.com/ahmedahmedovv/rss-ai-category/refs/heads/main/data/categorized_articles.json"
+app.config['API_URL'] = API_URL
+
 @app.route('/')
 def index():
     logger.info('Accessing home page')
