@@ -69,6 +69,29 @@
         .BtnGroup-item:hover {
             text-decoration: none;
         }
+        
+        .Pagination .BtnGroup {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .Pagination .BtnGroup-item {
+            border: 1px solid #d5d0c5;
+            padding: 5px 10px;
+            color: #24292e;
+            background-color: #fff;
+        }
+        
+        .Pagination .BtnGroup-item.selected {
+            background-color: #0366d6;
+            color: white;
+            border-color: #0366d6;
+        }
+        
+        .Pagination .BtnGroup-item:hover:not(.selected) {
+            background-color: #f6f8fa;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
@@ -146,6 +169,52 @@
                         </div>
                     </div>
                     {% endfor %}
+                    
+                    {% if total_pages > 1 %}
+                    <div class="Pagination d-flex flex-justify-center mt-3">
+                        <div class="BtnGroup">
+                            {% if current_page > 1 %}
+                            <a href="{{ '{}?category={}&sort={}&page={}'.format(
+                                request.path,
+                                selected_category if selected_category else '',
+                                request.args.get('sort', 'desc'),
+                                current_page - 1
+                            ) | trim }}" 
+                               class="btn BtnGroup-item">
+                                Previous
+                            </a>
+                            {% endif %}
+                            
+                            {% for p in range(1, total_pages + 1) %}
+                                {% if p == current_page %}
+                                    <span class="btn BtnGroup-item selected">{{ p }}</span>
+                                {% else %}
+                                    <a href="{{ '{}?category={}&sort={}&page={}'.format(
+                                        request.path,
+                                        selected_category if selected_category else '',
+                                        request.args.get('sort', 'desc'),
+                                        p
+                                    ) | trim }}" 
+                                       class="btn BtnGroup-item">
+                                        {{ p }}
+                                    </a>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if current_page < total_pages %}
+                            <a href="{{ '{}?category={}&sort={}&page={}'.format(
+                                request.path,
+                                selected_category if selected_category else '',
+                                request.args.get('sort', 'desc'),
+                                current_page + 1
+                            ) | trim }}" 
+                               class="btn BtnGroup-item">
+                                Next
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

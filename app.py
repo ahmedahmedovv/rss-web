@@ -21,6 +21,9 @@ logger = logging.getLogger(__name__)
 
 DATABASE_URL = os.environ.get('DATABASE_URL', 'articles.db')
 
+# Add these constants at the top of the file after the imports
+ARTICLES_PER_PAGE = 10  # Number of articles to show per page
+
 def init_db():
     try:
         conn = sqlite3.connect(DATABASE_URL)
@@ -115,7 +118,8 @@ def get_counts():
 @app.route('/')
 def index():
     selected_category = request.args.get('category', '')
-    sort_order = request.args.get('sort', 'desc')  # Default to descending
+    sort_order = request.args.get('sort', 'desc')
+    page = request.args.get('page', 1, type=int)  # Get current page number
     
     try:
         response = requests.get("https://raw.githubusercontent.com/ahmedahmedovv/rss-ai-category/refs/heads/main/data/categorized_articles.json")
@@ -135,24 +139,40 @@ def index():
             
         # Sort articles
         articles = sort_articles(articles, sort_order)
+        
+        # Calculate pagination
+        total_articles = len(articles)
+        total_pages = (total_articles + ARTICLES_PER_PAGE - 1) // ARTICLES_PER_PAGE
+        
+        # Ensure page is within valid range
+        page = max(1, min(page, total_pages))
+        
+        # Slice articles for current page
+        start_idx = (page - 1) * ARTICLES_PER_PAGE
+        end_idx = start_idx + ARTICLES_PER_PAGE
+        paginated_articles = articles[start_idx:end_idx]
             
         # Add read state to articles
-        for article in articles:
+        for article in paginated_articles:
             article['is_read'] = article['link'] in read_articles
             
     except Exception as e:
-        print(f"Unexpected error: {str(e)}")
-        articles = []
+        logger.error(f"Unexpected error: {str(e)}")
+        paginated_articles = []
         categories = []
         unread_counts = {}
         total_unread = 0
+        total_pages = 1
+        page = 1
     
     return render_template('index.html', 
-                         articles=articles, 
+                         articles=paginated_articles, 
                          categories=categories, 
                          selected_category=selected_category,
                          unread_counts=unread_counts,
-                         total_unread=total_unread)
+                         total_unread=total_unread,
+                         current_page=page,
+                         total_pages=total_pages)
 
 if __name__ == '__main__':
     app.run(debug=True) 
