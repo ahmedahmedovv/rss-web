@@ -102,11 +102,17 @@
                         {% endif %}
                     </h2>
                     <div class="BtnGroup">
-                        <a href="{{ '/?category=' + selected_category if selected_category else '/' }}&sort=desc" 
+                        <a href="{{ '{}?category={}&sort=desc'.format(
+                            request.path,
+                            selected_category if selected_category else ''
+                        ) | trim }}" 
                            class="btn BtnGroup-item {% if request.args.get('sort') != 'asc' %}selected{% endif %}">
                             Newest First
                         </a>
-                        <a href="{{ '/?category=' + selected_category if selected_category else '/' }}&sort=asc" 
+                        <a href="{{ '{}?category={}&sort=asc'.format(
+                            request.path,
+                            selected_category if selected_category else ''
+                        ) | trim }}" 
                            class="btn BtnGroup-item {% if request.args.get('sort') == 'asc' %}selected{% endif %}">
                             Oldest First
                         </a>
