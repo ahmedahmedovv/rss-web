@@ -105,7 +105,7 @@
                 </a>
                 {% for category in categories %}
                 <a class="SideNav-item {% if category == selected_category %}selected{% endif %}" 
-                   href="/?category={{ category | urlencode }}">
+                   href="/?{{ urlencode(dict(category=category)) }}">
                     {{ category }}
                     <span class="Counter" data-category="{{ category }}">{{ unread_counts[category] }}</span>
                 </a>
@@ -125,18 +125,20 @@
                         {% endif %}
                     </h2>
                     <div class="BtnGroup">
-                        <a href="{{ '{}?category={}&sort=desc'.format(
-                            request.path,
-                            selected_category if selected_category else ''
-                        ) | trim }}" 
-                           class="btn BtnGroup-item {% if request.args.get('sort') != 'asc' %}selected{% endif %}">
+                        <a href="/?{{ urlencode(dict(
+                            category=selected_category,
+                            sort='desc',
+                            page=1
+                        ) | dict_filter) }}" 
+                           class="btn BtnGroup-item {% if sort_order != 'asc' %}selected{% endif %}">
                             Newest First
                         </a>
-                        <a href="{{ '{}?category={}&sort=asc'.format(
-                            request.path,
-                            selected_category if selected_category else ''
-                        ) | trim }}" 
-                           class="btn BtnGroup-item {% if request.args.get('sort') == 'asc' %}selected{% endif %}">
+                        <a href="/?{{ urlencode(dict(
+                            category=selected_category,
+                            sort='asc',
+                            page=1
+                        ) | dict_filter) }}" 
+                           class="btn BtnGroup-item {% if sort_order == 'asc' %}selected{% endif %}">
                             Oldest First
                         </a>
                     </div>
@@ -174,12 +176,11 @@
                     <div class="Pagination d-flex flex-justify-center mt-3">
                         <div class="BtnGroup">
                             {% if current_page > 1 %}
-                            <a href="{{ '{}?category={}&sort={}&page={}'.format(
-                                request.path,
-                                selected_category if selected_category else '',
-                                request.args.get('sort', 'desc'),
-                                current_page - 1
-                            ) | trim }}" 
+                            <a href="/?{{ urlencode(dict(
+                                category=selected_category,
+                                sort=sort_order,
+                                page=current_page - 1
+                            ) | dict_filter) }}" 
                                class="btn BtnGroup-item">
                                 Previous
                             </a>
@@ -189,12 +190,11 @@
                                 {% if p == current_page %}
                                     <span class="btn BtnGroup-item selected">{{ p }}</span>
                                 {% else %}
-                                    <a href="{{ '{}?category={}&sort={}&page={}'.format(
-                                        request.path,
-                                        selected_category if selected_category else '',
-                                        request.args.get('sort', 'desc'),
-                                        p
-                                    ) | trim }}" 
+                                    <a href="/?{{ urlencode(dict(
+                                        category=selected_category,
+                                        sort=sort_order,
+                                        page=p
+                                    ) | dict_filter) }}" 
                                        class="btn BtnGroup-item">
                                         {{ p }}
                                     </a>
@@ -202,12 +202,11 @@
                             {% endfor %}
                             
                             {% if current_page < total_pages %}
-                            <a href="{{ '{}?category={}&sort={}&page={}'.format(
-                                request.path,
-                                selected_category if selected_category else '',
-                                request.args.get('sort', 'desc'),
-                                current_page + 1
-                            ) | trim }}" 
+                            <a href="/?{{ urlencode(dict(
+                                category=selected_category,
+                                sort=sort_order,
+                                page=current_page + 1
+                            ) | dict_filter) }}" 
                                class="btn BtnGroup-item">
                                 Next
                             </a>
