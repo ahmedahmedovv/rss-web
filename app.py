@@ -59,6 +59,21 @@ def calculate_counts(articles, read_articles):
     
     return categories, unread_counts, total_unread
 
+def sort_articles(articles, sort_order='desc'):
+    """
+    Sort articles by date
+    sort_order: 'asc' for ascending, 'desc' for descending
+    """
+    try:
+        return sorted(
+            articles,
+            key=lambda x: datetime.strptime(x['published'], '%Y-%m-%d %H:%M:%S'),
+            reverse=(sort_order == 'desc')
+        )
+    except Exception as e:
+        logger.error(f"Error sorting articles: {e}")
+        return articles
+
 @app.route('/toggle_read', methods=['POST'])
 def toggle_read():
     data = request.json
@@ -100,6 +115,7 @@ def get_counts():
 @app.route('/')
 def index():
     selected_category = request.args.get('category', '')
+    sort_order = request.args.get('sort', 'desc')  # Default to descending
     
     try:
         response = requests.get("https://raw.githubusercontent.com/ahmedahmedovv/rss-ai-category/refs/heads/main/data/categorized_articles.json")
@@ -116,6 +132,9 @@ def index():
             articles = [article for article in all_articles if article.get('category') == selected_category]
         else:
             articles = all_articles
+            
+        # Sort articles
+        articles = sort_articles(articles, sort_order)
             
         # Add read state to articles
         for article in articles:

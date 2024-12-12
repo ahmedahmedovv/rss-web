@@ -60,6 +60,15 @@
             background-color: #e8e6e1;
             border-left: 4px solid #a39e93;
         }
+        
+        .BtnGroup-item.selected {
+            background-color: #0366d6;
+            color: white;
+        }
+        
+        .BtnGroup-item:hover {
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
@@ -84,7 +93,7 @@
         <!-- Main Content -->
         <div class="flex-auto p-3">
             <div class="Box">
-                <div class="Box-header">
+                <div class="Box-header d-flex flex-justify-between flex-items-center">
                     <h2 class="Box-title">
                         {% if selected_category %}
                             Articles in {{ selected_category }}
@@ -92,6 +101,16 @@
                             All Articles
                         {% endif %}
                     </h2>
+                    <div class="BtnGroup">
+                        <a href="{{ '/?category=' + selected_category if selected_category else '/' }}&sort=desc" 
+                           class="btn BtnGroup-item {% if request.args.get('sort') != 'asc' %}selected{% endif %}">
+                            Newest First
+                        </a>
+                        <a href="{{ '/?category=' + selected_category if selected_category else '/' }}&sort=asc" 
+                           class="btn BtnGroup-item {% if request.args.get('sort') == 'asc' %}selected{% endif %}">
+                            Oldest First
+                        </a>
+                    </div>
                 </div>
                 <div class="Box-body">
                     {% if not articles %}
