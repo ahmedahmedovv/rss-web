@@ -28,10 +28,36 @@
         .sidebar {
             width: 400px;
             margin-right: 40px;
+            position: sticky;
+            top: 20px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
         }
+        
+        /* Add smooth scrolling for sidebar */
+        .sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .sidebar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        
+        /* Ensure content area takes remaining space */
         .content {
             flex: 1;
             max-width: 1200px;
+            overflow-y: auto;
         }
         .category-filter {
             cursor: pointer;
