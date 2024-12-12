@@ -4,96 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RSS Articles</title>
+    <!-- Primer CSS -->
     <link href="https://unpkg.com/@primer/css@^20.2.4/dist/primer.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body {
-            background-color: #fbeede; /* New base color */
+            background-color: #fbeede;
         }
-        
-        .article-box {
-            cursor: pointer;
-            transition: background-color 0.3s, border-left 0.3s;
-            border-left: 4px solid transparent;
-            background-color: #fff9f0; /* Lighter shade */
-            box-shadow: 0 1px 3px rgba(139, 119, 95, 0.1);
-        }
-        
-        .article-box:hover {
-            background-color: #fffaf3; /* Slightly lighter warm white */
-            box-shadow: 0 2px 5px rgba(139, 119, 95, 0.15);
-        }
-        
-        .article-box.read {
-            background-color: #f5e7d7; /* Muted warm tone */
-            border-left: 4px solid #d4b595; /* Darker warm accent */
-        }
-        
-        .article-box.read h3 a {
-            color: #a08b6e !important; /* Muted warm brown */
-            text-decoration: line-through;
-        }
-        
-        .article-box.read .color-fg-muted {
-            color: #b39f84 !important; /* Softer warm brown */
-        }
-        
         .Box {
-            background-color: #fff9f0;
-            border-color: #e6d5bc;
+            background-color: white;
+            border: 1px solid rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        
-        .SideNav {
-            background-color: #fff9f0;
-            border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(139, 119, 95, 0.1);
+        .Box-header {
+            background-color: rgba(251, 238, 222, 0.3);
+            border-bottom: 1px solid rgba(0,0,0,0.1);
         }
-        
-        .SideNav-item {
-            border-bottom: 1px solid #f5e7d7;
-        }
-        
-        .SideNav-item:hover {
-            background-color: #fffaf3;
-        }
-        
-        .SideNav-item.selected {
-            background-color: #f5e7d7;
-            border-left: 4px solid #d4b595;
-        }
-        
-        .BtnGroup-item.selected {
-            background-color: #c4a17d; /* Warm accent color */
-            color: white;
-        }
-        
-        .BtnGroup-item:hover {
-            text-decoration: none;
-        }
-        
-        .Pagination .BtnGroup {
-            display: flex;
-            gap: 4px;
-        }
-        
-        .Pagination .BtnGroup-item {
-            border: 1px solid #e6d5bc;
-            padding: 5px 10px;
-            color: #7d6548;
-            background-color: #fff9f0;
-        }
-        
-        .Pagination .BtnGroup-item.selected {
-            background-color: #c4a17d;
-            color: white;
-            border-color: #c4a17d;
-        }
-        
-        .Pagination .BtnGroup-item:hover:not(.selected) {
-            background-color: #fffaf3;
-            text-decoration: none;
+        .Label--success {
+            background-color: #fbeede;
+            color: #24292f;
+            border: 1px solid rgba(0,0,0,0.1);
         }
     </style>
 </head>
+<<<<<<< HEAD
 <body>
     <div class="d-flex flex-row">
         <!-- Sidebar -->
@@ -131,221 +65,61 @@
                 </div>
                 {% endif %}
             </nav>
+=======
+<body class="container-lg px-3 py-5">
+    <div class="Box">
+        <div class="Box-header">
+            <h2 class="Box-title">RSS Articles</h2>
+>>>>>>> 169712a (v13)
         </div>
-
-        <!-- Main Content -->
-        <div class="flex-auto p-3">
-            <div class="Box">
-                <div class="Box-header d-flex flex-justify-between flex-items-center">
-                    <h2 class="Box-title">
-                        {% if selected_category %}
-                            Articles in {{ selected_category }}
-                        {% else %}
-                            All Articles
-                        {% endif %}
-                    </h2>
-                    <div class="BtnGroup">
-                        <a href="/?{{ urlencode(dict(
-                            category=selected_category,
-                            sort='desc',
-                            page=1
-                        ) | dict_filter) }}" 
-                           class="btn BtnGroup-item {% if sort_order != 'asc' %}selected{% endif %}">
-                            Newest First
-                        </a>
-                        <a href="/?{{ urlencode(dict(
-                            category=selected_category,
-                            sort='asc',
-                            page=1
-                        ) | dict_filter) }}" 
-                           class="btn BtnGroup-item {% if sort_order == 'asc' %}selected{% endif %}">
-                            Oldest First
-                        </a>
-                    </div>
-                </div>
-                <div class="Box-body">
-                    {% if not articles %}
-                        <div class="blankslate">
-                            <h3>No articles found</h3>
-                            <p>There are no articles in this category.</p>
-                        </div>
-                    {% endif %}
-                    
-                    {% for article in articles %}
-                    <div class="Box mb-3 article-box {% if article.is_read %}read{% endif %}" 
-                         data-link="{{ article.link }}">
-                        <div class="Box-row d-flex flex-justify-between flex-items-center">
-                            <div class="flex-auto">
-                                <h3 class="mb-1">
-                                    <a href="{{ article.link }}" 
-                                       class="Link--primary" 
-                                       target="_blank"
-                                       rel="noopener"
-                                       onclick="event.stopPropagation()">{{ article.optimized_title }}</a>
-                                </h3>
-                                <p class="color-fg-muted mb-2">Category: {{ article.category }}</p>
-                            </div>
-                            <div class="flex-shrink-0 ml-3">
-                                <p class="color-fg-subtle">Published: {{ article.published }}</p>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                    
-                    {% if total_pages > 1 %}
-                    <div class="Pagination d-flex flex-justify-center mt-3">
-                        <div class="BtnGroup">
-                            {% if current_page > 1 %}
-                            <a href="/?{{ urlencode(dict(
-                                category=selected_category,
-                                sort=sort_order,
-                                page=current_page - 1
-                            ) | dict_filter) }}" 
-                               class="btn BtnGroup-item">
-                                Previous
-                            </a>
-                            {% endif %}
-                            
-                            {# Always show first page #}
-                            {% if current_page > 3 %}
-                                <a href="/?{{ urlencode(dict(
-                                    category=selected_category,
-                                    sort=sort_order,
-                                    page=1
-                                ) | dict_filter) }}" 
-                                   class="btn BtnGroup-item">1</a>
-                                {% if current_page > 4 %}
-                                    <span class="btn BtnGroup-item">...</span>
-                                {% endif %}
-                            {% endif %}
-                            
-                            {# Show pages around current page #}
-                            {% for p in range(
-                                [current_page - 2, 1]|max,
-                                [current_page + 3, total_pages + 1]|min
-                            ) %}
-                                {% if p == current_page %}
-                                    <span class="btn BtnGroup-item selected">{{ p }}</span>
-                                {% else %}
-                                    <a href="/?{{ urlencode(dict(
-                                        category=selected_category,
-                                        sort=sort_order,
-                                        page=p
-                                    ) | dict_filter) }}" 
-                                       class="btn BtnGroup-item">{{ p }}</a>
-                                {% endif %}
-                            {% endfor %}
-                            
-                            {# Always show last page #}
-                            {% if current_page < total_pages - 2 %}
-                                {% if current_page < total_pages - 3 %}
-                                    <span class="btn BtnGroup-item">...</span>
-                                {% endif %}
-                                <a href="/?{{ urlencode(dict(
-                                    category=selected_category,
-                                    sort=sort_order,
-                                    page=total_pages
-                                ) | dict_filter) }}" 
-                                   class="btn BtnGroup-item">{{ total_pages }}</a>
-                            {% endif %}
-                            
-                            {% if current_page < total_pages %}
-                            <a href="/?{{ urlencode(dict(
-                                category=selected_category,
-                                sort=sort_order,
-                                page=current_page + 1
-                            ) | dict_filter) }}" 
-                               class="btn BtnGroup-item">
-                                Next
-                            </a>
-                            {% endif %}
-                        </div>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
+        <div id="loading" class="Box-body text-center">
+            <div class="Spinner"></div>
+            <p>Loading articles...</p>
         </div>
+        <div id="articles" class="Box-body"></div>
     </div>
+
     <script>
-    async function updateCounts() {
-        try {
-            const response = await fetch('/get_counts');
-            const counts = await response.json();
-            
-            // Update all counters
-            document.querySelectorAll('.Counter').forEach(counter => {
-                const category = counter.getAttribute('data-category');
-                if (category === 'total') {
-                    counter.textContent = counts.total;
-                } else {
-                    counter.textContent = counts[category] || 0;
-                }
-            });
-        } catch (error) {
-            console.error('Error updating counts:', error);
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('.article-box').forEach(box => {
-            // Get the link element within the box
-            const linkElement = box.querySelector('a');
-            
-            // Add click handler for the link
-            linkElement.addEventListener('click', async function(event) {
-                // Don't stop propagation - let the link open in new tab
-                const link = box.dataset.link;
-                
-                try {
-                    const response = await fetch('/toggle_read', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ link: link })
+        $(document).ready(function() {
+            $.ajax({
+                url: '/get_articles',
+                method: 'GET',
+                success: function(data) {
+                    $('#loading').hide();
+                    let articlesHtml = '';
+                    
+                    data.forEach(article => {
+                        articlesHtml += `
+                            <div class="Box mb-3">
+                                <div class="Box-header">
+                                    <h3 class="Box-title">
+                                        <a href="${article.link}" class="Link--primary" target="_blank">
+                                            ${article.title}
+                                        </a>
+                                    </h3>
+                                </div>
+                                <div class="Box-body">
+                                    <p class="text-small color-fg-muted">${article.published}</p>
+                                    <p>${article.summary}</p>
+                                    <span class="Label Label--success">${article.category}</span>
+                                </div>
+                            </div>
+                        `;
                     });
                     
-                    const data = await response.json();
-                    if (data.is_read) {
-                        box.classList.add('read');
-                    } else {
-                        box.classList.remove('read');
-                    }
-                    
-                    // Update counts after toggling read status
-                    await updateCounts();
-                } catch (error) {
-                    console.error('Error toggling read state:', error);
-                }
-            });
-
-            // Keep the existing box click handler
-            box.addEventListener('click', async function() {
-                const link = this.dataset.link;
-                
-                try {
-                    const response = await fetch('/toggle_read', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ link: link })
-                    });
-                    
-                    const data = await response.json();
-                    if (data.is_read) {
-                        this.classList.add('read');
-                    } else {
-                        this.classList.remove('read');
-                    }
-                    
-                    // Update counts after toggling read status
-                    await updateCounts();
-                } catch (error) {
-                    console.error('Error toggling read state:', error);
+                    $('#articles').html(articlesHtml);
+                },
+                error: function(xhr, status, error) {
+                    $('#loading').hide();
+                    $('#articles').html(`
+                        <div class="flash flash-error">
+                            Error loading articles: ${error}
+                        </div>
+                    `);
                 }
             });
         });
+<<<<<<< HEAD
     });
 
     async function markCategoryRead(category, event) {
@@ -415,6 +189,8 @@
             console.error('Error marking category as read:', error);
         }
     }
+=======
+>>>>>>> 169712a (v13)
     </script>
 </body>
-</html> 
+</html>
