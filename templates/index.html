@@ -100,14 +100,18 @@
                                 <div class="Box-header">
                                     <h3 class="Box-title">
                                         <a href="${article.link}" class="Link--primary" target="_blank">
-                                            ${article.title}
+                                            ${article.optimized_title || 'Not available'}
                                         </a>
                                     </h3>
                                 </div>
                                 <div class="Box-body">
-                                    <p class="text-small color-fg-muted">${article.published}</p>
-                                    <p>${article.summary}</p>
-                                    <span class="Label Label--success">${article.category}</span>
+                                    <p class="text-small color-fg-muted mb-2">
+                                        Optimized at: ${article.optimized_at || 'Not available'}
+                                    </p>
+                                    <p class="mb-2">
+                                        <strong>Category:</strong> 
+                                        <span class="Label Label--success">${article.category}</span>
+                                    </p>
                                 </div>
                             </div>
                         `;
