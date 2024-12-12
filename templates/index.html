@@ -4,8 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RSS Articles</title>
-    <!-- Primer CSS -->
     <link href="https://unpkg.com/@primer/css@^20.2.4/dist/primer.css" rel="stylesheet" />
+    <style>
+        .article-box {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .article-box.read {
+            background-color: #f6f8fa;
+        }
+        .article-box.read h3 a {
+            color: #666 !important;
+        }
+    </style>
 </head>
 <body>
     <div class="d-flex flex-row">
@@ -14,11 +25,13 @@
             <nav class="SideNav">
                 <a class="SideNav-item {% if not selected_category %}selected{% endif %}" href="/">
                     All Categories
+                    <span class="Counter" data-category="total">{{ total_unread }}</span>
                 </a>
                 {% for category in categories %}
                 <a class="SideNav-item {% if category == selected_category %}selected{% endif %}" 
                    href="/?category={{ category | urlencode }}">
                     {{ category }}
+                    <span class="Counter" data-category="{{ category }}">{{ unread_counts[category] }}</span>
                 </a>
                 {% endfor %}
             </nav>
@@ -45,11 +58,16 @@
                     {% endif %}
                     
                     {% for article in articles %}
-                    <div class="Box mb-3">
+                    <div class="Box mb-3 article-box {% if article.is_read %}read{% endif %}" 
+                         data-link="{{ article.link }}">
                         <div class="Box-row d-flex flex-justify-between flex-items-center">
                             <div class="flex-auto">
                                 <h3 class="mb-1">
-                                    <a href="{{ article.link }}" class="Link--primary">{{ article.optimized_title }}</a>
+                                    <a href="{{ article.link }}" 
+                                       class="Link--primary" 
+                                       target="_blank"
+                                       rel="noopener"
+                                       onclick="event.stopPropagation()">{{ article.optimized_title }}</a>
                                 </h3>
                                 <p class="color-fg-muted mb-2">Category: {{ article.category }}</p>
                             </div>
@@ -63,5 +81,55 @@
             </div>
         </div>
     </div>
+    <script>
+    async function updateCounts() {
+        try {
+            const response = await fetch('/get_counts');
+            const counts = await response.json();
+            
+            // Update all counters
+            document.querySelectorAll('.Counter').forEach(counter => {
+                const category = counter.getAttribute('data-category');
+                if (category === 'total') {
+                    counter.textContent = counts.total;
+                } else {
+                    counter.textContent = counts[category] || 0;
+                }
+            });
+        } catch (error) {
+            console.error('Error updating counts:', error);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.article-box').forEach(box => {
+            box.addEventListener('click', async function() {
+                const link = this.dataset.link;
+                
+                try {
+                    const response = await fetch('/toggle_read', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ link: link })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.is_read) {
+                        this.classList.add('read');
+                    } else {
+                        this.classList.remove('read');
+                    }
+                    
+                    // Update counts after toggling read status
+                    await updateCounts();
+                } catch (error) {
+                    console.error('Error toggling read state:', error);
+                }
+            });
+        });
+    });
+    </script>
 </body>
 </html> 

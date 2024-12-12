@@ -1,0 +1,18 @@
+2024-12-12 02:23:16,071 - werkzeug - WARNING -  * Debugger is active!
+2024-12-12 02:23:16,081 - werkzeug - INFO -  * Debugger PIN: 132-792-872
+2024-12-12 02:23:34,113 - werkzeug - INFO -  * Detected change in '/Users/mymac/Desktop/myapp/office/4 web/3/tests/test_app.py', reloading
+2024-12-12 02:23:34,630 - werkzeug - WARNING -  * Debugger is active!
+2024-12-12 02:23:34,652 - werkzeug - INFO -  * Debugger PIN: 132-792-872
+2024-12-12 02:23:42,592 - werkzeug - INFO - 127.0.0.1 - - [12/Dec/2024 02:23:42] "GET /?category=Military%20Operations HTTP/1.1" 200 -
+2024-12-12 02:23:44,827 - werkzeug - INFO - 127.0.0.1 - - [12/Dec/2024 02:23:44] "GET /?category=Cybersecurity HTTP/1.1" 200 -
+2024-12-12 02:23:45,948 - werkzeug - INFO - 127.0.0.1 - - [12/Dec/2024 02:23:45] "POST /toggle_read HTTP/1.1" 200 -
+2024-12-12 02:23:46,143 - werkzeug - INFO - 127.0.0.1 - - [12/Dec/2024 02:23:46] "GET /get_counts HTTP/1.1" 200 -
+2024-12-12 02:23:46,668 - werkzeug - INFO - 127.0.0.1 - - [12/Dec/2024 02:23:46] "POST /toggle_read HTTP/1.1" 200 -
+2024-12-12 02:23:46,842 - werkzeug - INFO - 127.0.0.1 - - [12/Dec/2024 02:23:46] "GET /get_counts HTTP/1.1" 200 -
+2024-12-12 02:23:47,649 - werkzeug - INFO - 127.0.0.1 - - [12/Dec/2024 02:23:47] "GET /?category=Cybersecurity HTTP/1.1" 200 -
+2024-12-12 02:23:48,436 - werkzeug - INFO - 127.0.0.1 - - [12/Dec/2024 02:23:48] "GET /?category=Cybersecurity HTTP/1.1" 200 -
+2024-12-12 02:23:49,263 - werkzeug - INFO - 127.0.0.1 - - [12/Dec/2024 02:23:49] "POST /toggle_read HTTP/1.1" 200 -
+2024-12-12 02:23:49,378 - werkzeug - INFO - 127.0.0.1 - - [12/Dec/2024 02:23:49] "GET /get_counts HTTP/1.1" 200 -
+2024-12-12 02:23:50,587 - werkzeug - INFO - 127.0.0.1 - - [12/Dec/2024 02:23:50] "GET /?category=Cybersecurity HTTP/1.1" 200 -
+2024-12-12 02:23:51,862 - werkzeug - INFO - 127.0.0.1 - - [12/Dec/2024 02:23:51] "POST /toggle_read HTTP/1.1" 200 -
+2024-12-12 02:23:51,997 - werkzeug - INFO - 127.0.0.1 - - [12/Dec/2024 02:23:51] "GET /get_counts HTTP/1.1" 200 -
