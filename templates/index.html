@@ -25,6 +25,26 @@
             color: #24292f;
             border: 1px solid rgba(0,0,0,0.1);
         }
+        .sidebar {
+            width: 200px;
+            margin-right: 20px;
+        }
+        .content {
+            flex: 1;
+        }
+        .category-filter {
+            cursor: pointer;
+            padding: 8px;
+            margin: 4px 0;
+            border-radius: 6px;
+        }
+        .category-filter:hover {
+            background-color: #f6f8fa;
+        }
+        .category-filter.active {
+            background-color: #fbeede;
+            font-weight: bold;
+        }
     </style>
 </head>
 <<<<<<< HEAD
@@ -67,57 +87,121 @@
             </nav>
 =======
 <body class="container-lg px-3 py-5">
+<<<<<<< HEAD
     <div class="Box">
         <div class="Box-header">
             <h2 class="Box-title">RSS Articles</h2>
 >>>>>>> 169712a (v13)
+=======
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <div class="sidebar Box">
+            <div class="Box-header">
+                <h3 class="Box-title">Categories</h3>
+            </div>
+            <div class="Box-body" id="categories-list">
+                <div class="category-filter active" data-category="all">
+                    All Categories
+                </div>
+                <!-- Categories will be populated dynamically -->
+            </div>
+>>>>>>> 5d93fd3 (v16)
         </div>
-        <div id="loading" class="Box-body text-center">
-            <div class="Spinner"></div>
-            <p>Loading articles...</p>
+
+        <!-- Main Content -->
+        <div class="content">
+            <div class="Box">
+                <div class="Box-header">
+                    <h2 class="Box-title">RSS Articles</h2>
+                </div>
+                <div id="loading" class="Box-body text-center">
+                    <div class="Spinner"></div>
+                    <p>Loading articles...</p>
+                </div>
+                <div id="articles" class="Box-body"></div>
+            </div>
         </div>
-        <div id="articles" class="Box-body"></div>
     </div>
 
     <script>
         $(document).ready(function() {
+            let allArticles = [];
+            let categories = new Set();
+
+            function updateCategoryFilters() {
+                let categoriesHtml = `
+                    <div class="category-filter active" data-category="all">
+                        All Categories
+                    </div>
+                `;
+                
+                categories.forEach(category => {
+                    categoriesHtml += `
+                        <div class="category-filter" data-category="${category}">
+                            ${category}
+                        </div>
+                    `;
+                });
+                
+                $('#categories-list').html(categoriesHtml);
+            }
+
+            function filterArticles(category) {
+                let filteredArticles = category === 'all' 
+                    ? allArticles 
+                    : allArticles.filter(article => article.category === category);
+                
+                renderArticles(filteredArticles);
+            }
+
+            function renderArticles(articles) {
+                let articlesHtml = '';
+                
+                articles.forEach(article => {
+                    // Format the date
+                    let formattedDate = 'Not available';
+                    if (article.optimized_at) {
+                        const date = new Date(article.optimized_at);
+                        formattedDate = date.toLocaleDateString('en-GB', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                        });
+                    }
+
+                    articlesHtml += `
+                        <div class="Box mb-3">
+                            <div class="Box-header d-flex flex-items-center">
+                                <h3 class="Box-title flex-auto">
+                                    <a href="${article.link}" class="Link--primary" target="_blank">
+                                        ${article.optimized_title || 'Not available'}
+                                    </a>
+                                </h3>
+                                <span class="text-small color-fg-muted">
+                                    ${formattedDate}
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                $('#articles').html(articlesHtml);
+            }
+
             $.ajax({
                 url: '/get_articles',
                 method: 'GET',
                 success: function(response) {
                     $('#loading').hide();
-                    let articlesHtml = '';
+                    allArticles = response.data;
                     
-                    articlesHtml += `
-                        <div class="flash flash-success mb-3">
-                            Last updated: ${response.timestamp}
-                        </div>
-                    `;
-                    
-                    response.data.forEach(article => {
-                        articlesHtml += `
-                            <div class="Box mb-3">
-                                <div class="Box-header">
-                                    <h3 class="Box-title">
-                                        <a href="${article.link}" class="Link--primary" target="_blank">
-                                            ${article.optimized_title || 'Not available'}
-                                        </a>
-                                    </h3>
-                                </div>
-                                <div class="Box-body">
-                                    <p class="text-small color-fg-muted mb-2">
-                                        Optimized at: ${article.optimized_at || 'Not available'}
-                                    </p>
-                                    <p class="mb-2">
-                                        <strong>Category:</strong> 
-                                        <span class="Label Label--success">${article.category}</span>
-                                    </p>
-                                </div>
-                            </div>
-                        `;
+                    // Extract unique categories
+                    allArticles.forEach(article => {
+                        categories.add(article.category);
                     });
                     
-                    $('#articles').html(articlesHtml);
+                    updateCategoryFilters();
+                    renderArticles(allArticles);
                 },
                 error: function(xhr, status, error) {
                     $('#loading').hide();
@@ -127,6 +211,13 @@
                         </div>
                     `);
                 }
+            });
+
+            // Event delegation for category filters
+            $(document).on('click', '.category-filter', function() {
+                $('.category-filter').removeClass('active');
+                $(this).addClass('active');
+                filterArticles($(this).data('category'));
             });
         });
 <<<<<<< HEAD
