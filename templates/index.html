@@ -61,10 +61,12 @@
             overflow-y: auto;
         }
         .category-filter {
-            cursor: pointer;
-            padding: 8px;
-            margin: 4px 0;
-            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            margin: 6px 0;
+            border-left: 3px solid transparent;
         }
         .category-filter:nth-child(odd) {
             background-color: #f6f8fa;
@@ -78,6 +80,7 @@
         .category-filter.active {
             background-color: #fbeede !important;
             font-weight: bold;
+            border-left-color: #2ea44f;
         }
         .article-box {
             transition: opacity 0.3s ease;
@@ -159,6 +162,22 @@
 
         .container-lg {
             max-width: 1800px !important;
+        }
+
+        /* Add these styles */
+        .Box-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #24292f;
+        }
+
+        .article-box {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .article-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
     </style>
 </head>
