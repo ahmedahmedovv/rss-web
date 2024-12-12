@@ -162,52 +162,7 @@
         }
     </style>
 </head>
-<<<<<<< HEAD
-<body>
-    <div class="d-flex flex-row">
-        <!-- Sidebar -->
-        <div class="flex-shrink-0 col-3 p-3 border-right">
-            <nav class="SideNav">
-                {% if total_unread > 0 %}
-                <a class="SideNav-item {% if not selected_category %}selected{% endif %}" href="/">
-                    <div class="d-flex flex-justify-between flex-items-center">
-                        <span>All Categories</span>
-                        <div>
-                            <span class="Counter mr-2" data-category="total">{{ total_unread }}</span>
-                            <button class="btn btn-sm" onclick="markCategoryRead('all', event)" title="Mark All as Read">✓</button>
-                        </div>
-                    </div>
-                </a>
-                {% endif %}
-                {% for category in categories %}
-                    {% if unread_counts[category] > 0 %}
-                    <a class="SideNav-item {% if category == selected_category %}selected{% endif %}" 
-                       href="/?{{ urlencode(dict(category=category)) }}">
-                        <div class="d-flex flex-justify-between flex-items-center">
-                            <span>{{ category }}</span>
-                            <div>
-                                <span class="Counter mr-2" data-category="{{ category }}">{{ unread_counts[category] }}</span>
-                                <button class="btn btn-sm" onclick="markCategoryRead('{{ category }}', event)" title="Mark All as Read">✓</button>
-                            </div>
-                        </div>
-                    </a>
-                    {% endif %}
-                {% endfor %}
-                {% if total_unread == 0 %}
-                <div class="blankslate">
-                    <h3 class="mb-1">All Caught Up!</h3>
-                    <p>No unread articles</p>
-                </div>
-                {% endif %}
-            </nav>
-=======
 <body class="container-lg px-3 py-5">
-<<<<<<< HEAD
-    <div class="Box">
-        <div class="Box-header">
-            <h2 class="Box-title">RSS Articles</h2>
->>>>>>> 169712a (v13)
-=======
     <div class="d-flex">
         <!-- Sidebar -->
         <div class="sidebar Box">
@@ -224,9 +179,15 @@
                 </div>
             </div>
             <div class="Box-body" id="categories-list">
-                <!-- Categories will be populated dynamically -->
+                {% if categories %}
+                    {% for category in categories %}
+                        <div class="category-filter" data-category="{{ category }}">
+                            {{ category }}
+                            <span class="category-count">{{ unread_counts.get(category, 0) }}</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
             </div>
->>>>>>> 5d93fd3 (v16)
         </div>
 
         <!-- Main Content -->
@@ -495,78 +456,6 @@
                 }, 800);
             }
         });
-<<<<<<< HEAD
-    });
-
-    async function markCategoryRead(category, event) {
-        // Prevent navigation when clicking the button
-        event.preventDefault();
-        event.stopPropagation();
-        
-        try {
-            const response = await fetch('/mark_category_read', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ category: category })
-            });
-            
-            if (!response.ok) throw new Error('Failed to mark category as read');
-            
-            // Mark all visible articles in the category as read
-            document.querySelectorAll('.article-box').forEach(box => {
-                if (category === 'all' || box.querySelector('.color-fg-muted').textContent.includes(category)) {
-                    box.classList.add('read');
-                }
-            });
-            
-            // Hide the category from the sidebar immediately
-            if (category === 'all') {
-                // If marking all as read, show the "All Caught Up" message
-                document.querySelectorAll('.SideNav-item').forEach(item => {
-                    item.remove();
-                });
-                const sideNav = document.querySelector('.SideNav');
-                if (sideNav) {
-                    sideNav.innerHTML = `
-                        <div class="blankslate">
-                            <h3 class="mb-1">All Caught Up!</h3>
-                            <p>No unread articles</p>
-                        </div>`;
-                }
-            } else {
-                // Find the specific category item by looking for its text content
-                document.querySelectorAll('.SideNav-item').forEach(item => {
-                    const categoryText = item.querySelector('span')?.textContent.trim();
-                    if (categoryText === category) {
-                        item.remove();
-                    }
-                });
-                
-                // Check if there are any categories left
-                const remainingItems = document.querySelectorAll('.SideNav-item');
-                if (remainingItems.length === 0) {
-                    const sideNav = document.querySelector('.SideNav');
-                    if (sideNav) {
-                        sideNav.innerHTML = `
-                            <div class="blankslate">
-                                <h3 class="mb-1">All Caught Up!</h3>
-                                <p>No unread articles</p>
-                            </div>`;
-                    }
-                }
-            }
-            
-            // Update counts after UI changes
-            await updateCounts();
-            
-        } catch (error) {
-            console.error('Error marking category as read:', error);
-        }
-    }
-=======
->>>>>>> 169712a (v13)
     </script>
 </body>
 </html>

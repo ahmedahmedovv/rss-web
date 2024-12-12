@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import requests
 from flask_caching import Cache
 from datetime import datetime
@@ -41,7 +41,36 @@ cache = Cache(app)
 @app.route('/')
 def index():
     logger.info('Accessing home page')
-    return render_template('index.html')
+    try:
+        # Fetch articles from the API
+        url = "https://raw.githubusercontent.com/ahmedahmedovv/rss-ai-category/refs/heads/main/data/categorized_articles.json"
+        response = requests.get(url)
+        response.raise_for_status()
+        articles = response.json()
+        
+        # Calculate necessary variables for template
+        total_unread = len(articles)
+        categories = list(set(article.get('category', '') for article in articles))
+        unread_counts = {
+            category: len([a for a in articles if a.get('category') == category])
+            for category in categories
+        }
+        selected_category = request.args.get('category')
+        
+        return render_template('index.html',
+                             total_unread=total_unread,
+                             categories=categories,
+                             unread_counts=unread_counts,
+                             selected_category=selected_category)
+                             
+    except Exception as e:
+        logger.error(f"Error preparing index page: {str(e)}")
+        # Provide default values when there's an error
+        return render_template('index.html',
+                             total_unread=0,
+                             categories=[],
+                             unread_counts={},
+                             selected_category=None)
 
 @app.route('/get_articles')
 @cache.cached(timeout=300)
