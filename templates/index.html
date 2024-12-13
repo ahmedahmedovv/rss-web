@@ -7,6 +7,7 @@
     <!-- Primer CSS -->
     <link href="https://unpkg.com/@primer/css@^20.2.4/dist/primer.css" rel="stylesheet" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/@primer/octicons/build/build.css" />
     <style>
         body {
             background-color: #fbeede;
@@ -46,12 +47,12 @@
         }
         
         .sidebar::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
+            background: #2ea44f;
             border-radius: 4px;
         }
         
         .sidebar::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
+            background: #2c974b;
         }
         
         /* Ensure content area takes remaining space */
@@ -187,12 +188,72 @@
             border: 1px solid #d1d5da;
             background-color: #fff;
             cursor: pointer;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
 
         .form-select:focus {
             outline: none;
-            border-color: #0366d6;
-            box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.3);
+            border-color: #2ea44f;
+            box-shadow: 0 0 0 3px rgba(46, 164, 79, 0.3);
+        }
+
+        /* Add styles for the icons */
+        .octicon {
+            fill: currentColor;
+            vertical-align: text-bottom;
+        }
+
+        .BtnGroup-item.selected {
+            background-color: #2ea44f !important;
+            color: white;
+            border-color: #2ea44f !important;
+        }
+        .BtnGroup-item:not(.selected):hover {
+            background-color: #f6f8fa;
+            border-color: #2ea44f;
+            color: #2ea44f;
+        }
+        .BtnGroup-item {
+            padding: 4px 16px;
+            font-size: 16px;
+            line-height: 1;
+            transition: all 0.2s ease;
+        }
+        .BtnGroup-item .octicon {
+            margin: 0 2px;
+        }
+        /* Add tooltip styles */
+        .BtnGroup-item {
+            position: relative;
+        }
+        .BtnGroup-item:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(46, 164, 79, 0.9);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 1000;
+        }
+
+        /* Update link colors to match theme */
+        .Link--primary:hover {
+            color: #2ea44f !important;
+        }
+
+        /* Update focus states */
+        *:focus {
+            outline-color: #2ea44f;
+        }
+
+        /* Selected article highlight */
+        .border-green {
+            border: 2px solid #2ea44f !important;
         }
     </style>
 </head>
@@ -231,11 +292,14 @@
                 <div class="Box-header d-flex flex-items-center">
                     <h2 class="Box-title flex-auto">RSS Articles</h2>
                     <div class="d-flex flex-items-center">
-                        <select class="form-select mr-3" id="sortArticles">
-                            <option value="newest">Newest First</option>
-                            <option value="oldest">Oldest First</option>
-                            <option value="title">Title A-Z</option>
-                        </select>
+                        <div class="BtnGroup mr-3" role="group" aria-label="Sort articles">
+                            <button class="BtnGroup-item btn btn-sm selected" data-sort="newest" title="Newest first">
+                                ▼
+                            </button>
+                            <button class="BtnGroup-item btn btn-sm" data-sort="oldest" title="Oldest first">
+                                ▲
+                            </button>
+                        </div>
                         <label class="d-flex flex-items-center mr-3">
                             <input type="checkbox" id="markAllRead" class="mr-2">
                             <span class="text-small">Mark all as read</span>
@@ -587,15 +651,54 @@
                 });
             }
 
-            $('#sortArticles').html(`
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-            `);
+            // Add these styles to the existing styles section
+            const sortingStyles = `
+                <style>
+                    .BtnGroup-item.selected {
+                        background-color: #0366d6;
+                        color: white;
+                        border-color: #0366d6;
+                    }
+                    .BtnGroup-item:not(.selected):hover {
+                        background-color: #f6f8fa;
+                    }
+                    .BtnGroup-item {
+                        padding: 4px 16px;
+                        font-size: 16px;
+                        line-height: 1;
+                    }
+                    .BtnGroup-item .octicon {
+                        margin: 0 2px;
+                    }
+                    /* Add tooltip styles */
+                    .BtnGroup-item {
+                        position: relative;
+                    }
+                    .BtnGroup-item:hover::after {
+                        content: attr(title);
+                        position: absolute;
+                        bottom: -30px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        background: rgba(0,0,0,0.8);
+                        color: white;
+                        padding: 4px 8px;
+                        border-radius: 4px;
+                        font-size: 12px;
+                        white-space: nowrap;
+                        z-index: 1000;
+                    }
+                </style>
+            `;
+            $('head').append(sortingStyles);
 
-            $('#sortArticles').change(function() {
-                const sortType = $(this).val();
-                const currentCategory = $('.category-filter.active').data('category');
+            // Replace the sorting event handlers
+            $('.BtnGroup-item').click(function() {
+                const sortType = $(this).data('sort');
+                $('.BtnGroup-item').removeClass('selected');
+                $(this).addClass('selected');
                 
+                const currentCategory = $('.category-filter.active').data('category');
                 let articlesToShow = currentCategory ? 
                     allArticles.filter(article => article.category === decodeHtml(currentCategory)) : 
                     [...allArticles];
@@ -604,7 +707,6 @@
                     articlesToShow = articlesToShow.filter(article => !isArticleRead(article.link));
                 }
                 
-                // Create a new sorted array
                 const sortedArticles = sortArticles(articlesToShow, sortType);
                 renderArticles(sortedArticles);
                 updateVisibleArticles();
