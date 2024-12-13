@@ -68,6 +68,10 @@
             padding: 12px 16px;
             margin: 6px 0;
             border-left: 3px solid transparent;
+            border-radius: 6px;
+            margin: 4px 8px;
+            padding: 10px 16px;
+            transition: all 0.2s ease;
         }
         .category-filter:nth-child(odd) {
             background-color: #f6f8fa;
@@ -76,12 +80,12 @@
             background-color: white;
         }
         .category-filter:hover {
-            background-color: #edf2f7;
+            background-color: #f0f6fc;
+            transform: translateX(4px);
         }
         .category-filter.active {
-            background-color: #fbeede !important;
-            font-weight: bold;
-            border-left-color: #2ea44f;
+            background-color: #2ea44f15;
+            border-left: 4px solid #2ea44f;
         }
         .article-box {
             transition: opacity 0.3s ease;
@@ -167,18 +171,20 @@
 
         /* Add these styles */
         .Box-title {
-            font-size: 1.25rem;
-            font-weight: 400;
-            color: #24292f;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
         }
 
         .article-box {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
         }
 
+        /* Add hover effect for better interaction feedback */
         .article-box:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
         }
 
         .form-select {
@@ -274,6 +280,21 @@
             font-weight: 500;
             color: #2ea44f;
             text-decoration: none;
+        }
+
+        /* Add progress indicator */
+        .progress-bar {
+            height: 3px;
+            background: #eee;
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .progress-bar .progress {
+            height: 100%;
+            background: #2ea44f;
+            width: 0;
+            transition: width 0.3s ease;
         }
     </style>
 </head>
