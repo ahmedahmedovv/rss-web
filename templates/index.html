@@ -329,6 +329,21 @@
             0% { background-position: 200% 0; }
             100% { background-position: -200% 0; }
         }
+
+        .category-filter .star-icon {
+            color: #959da5;
+            cursor: pointer;
+            margin-right: 8px;
+        }
+        
+        .category-filter .star-icon.favorite {
+            color: #f1e05a;
+        }
+        
+        .category-filter {
+            display: flex;
+            align-items: center;
+        }
     </style>
 </head>
 <body class="container-lg px-3 py-5">
@@ -395,6 +410,7 @@
             let categories = new Set();
             let readArticles = new Set(JSON.parse(localStorage.getItem('readArticles') || '[]'));
             let showOnlyUnread = $('#showOnlyUnread').is(':checked');
+            let favoriteCategories = new Set(JSON.parse(localStorage.getItem('favoriteCategories') || '[]'));
 
             function isArticleRead(link) {
                 return readArticles.has(link);
@@ -428,16 +444,28 @@
 
             function updateCategoryFilters() {
                 let categoriesHtml = '';
+                const sortedCategories = Array.from(categories).sort((a, b) => {
+                    // First sort by favorite status
+                    const aFav = favoriteCategories.has(a);
+                    const bFav = favoriteCategories.has(b);
+                    if (aFav !== bFav) return bFav ? 1 : -1;
+                    // Then sort alphabetically
+                    return a.localeCompare(b);
+                });
                 
-                Array.from(categories).sort().forEach(category => {
+                sortedCategories.forEach(category => {
                     const unreadCount = getUnreadCount(category);
                     if (showOnlyUnread && unreadCount === 0) {
                         return;
                     }
                     const escapedCategory = escapeHtml(category);
+                    const isFavorite = favoriteCategories.has(category);
                     categoriesHtml += `
                         <div class="category-filter" data-category="${escapedCategory}">
-                            ${escapedCategory}
+                            <span class="star-icon ${isFavorite ? 'favorite' : ''}" data-category="${escapedCategory}">
+                                ${isFavorite ? '★' : '☆'}
+                            </span>
+                            <span class="category-name">${escapedCategory}</span>
                             <span class="category-count">${unreadCount}</span>
                         </div>
                     `;
@@ -794,6 +822,21 @@
             function resetContentHeader() {
                 $('#content-header').text('RSS Articles');
             }
+
+            // Add click handler for star icon
+            $(document).on('click', '.star-icon', function(e) {
+                e.stopPropagation();
+                const category = $(this).data('category');
+                
+                if (favoriteCategories.has(category)) {
+                    favoriteCategories.delete(category);
+                } else {
+                    favoriteCategories.add(category);
+                }
+                
+                localStorage.setItem('favoriteCategories', JSON.stringify(Array.from(favoriteCategories)));
+                updateCategoryFilters();
+            });
         });
     </script>
 </body>
