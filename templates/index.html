@@ -366,6 +366,20 @@
         .drag-handle:hover {
             color: #24292f;
         }
+
+        .Box-body p {
+            margin-bottom: 0;
+            line-height: 1.5;
+            max-height: 4.5em;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+
+        .article-box.read .Box-body p {
+            opacity: 0.7;
+        }
     </style>
 </head>
 <body class="container-lg px-3 py-5">
@@ -588,6 +602,11 @@
                                 <span class="text-small color-fg-muted">
                                     ${formattedDate}
                                 </span>
+                            </div>
+                            <div class="Box-body">
+                                <p class="text-small color-fg-muted mb-0">
+                                    ${article.summary || 'No summary available'}
+                                </p>
                             </div>
                         </div>
                     `;
