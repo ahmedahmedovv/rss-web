@@ -8,6 +8,7 @@
     <link href="https://unpkg.com/@primer/css@^20.2.4/dist/primer.css" rel="stylesheet" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/@primer/octicons/build/build.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <style>
         body {
             background-color: #fbeede;
@@ -62,6 +63,8 @@
             overflow-y: auto;
         }
         .category-filter {
+            cursor: move;
+            user-select: none;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -69,8 +72,6 @@
             margin: 6px 0;
             border-left: 3px solid transparent;
             border-radius: 6px;
-            margin: 4px 8px;
-            padding: 10px 16px;
             transition: all 0.2s ease;
         }
         .category-filter:nth-child(odd) {
@@ -344,6 +345,27 @@
             display: flex;
             align-items: center;
         }
+
+        .category-filter.sortable-ghost {
+            background-color: #f0f6fc;
+            opacity: 0.5;
+        }
+
+        .category-filter.sortable-drag {
+            background-color: #ffffff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .drag-handle {
+            cursor: move;
+            color: #959da5;
+            margin-right: 8px;
+            font-size: 14px;
+        }
+
+        .drag-handle:hover {
+            color: #24292f;
+        }
     </style>
 </head>
 <body class="container-lg px-3 py-5">
@@ -411,6 +433,7 @@
             let readArticles = new Set(JSON.parse(localStorage.getItem('readArticles') || '[]'));
             let showOnlyUnread = $('#showOnlyUnread').is(':checked');
             let favoriteCategories = new Set(JSON.parse(localStorage.getItem('favoriteCategories') || '[]'));
+            let categoryOrder = JSON.parse(localStorage.getItem('categoryOrder') || '[]');
 
             function isArticleRead(link) {
                 return readArticles.has(link);
@@ -444,16 +467,26 @@
 
             function updateCategoryFilters() {
                 let categoriesHtml = '';
-                const sortedCategories = Array.from(categories).sort((a, b) => {
+                let categoriesArray = Array.from(categories);
+                
+                // Sort categories based on stored order and favorites
+                categoriesArray.sort((a, b) => {
                     // First sort by favorite status
                     const aFav = favoriteCategories.has(a);
                     const bFav = favoriteCategories.has(b);
                     if (aFav !== bFav) return bFav ? 1 : -1;
-                    // Then sort alphabetically
-                    return a.localeCompare(b);
+                    
+                    // Then sort by custom order if exists
+                    const aIndex = categoryOrder.indexOf(a);
+                    const bIndex = categoryOrder.indexOf(b);
+                    
+                    if (aIndex === -1 && bIndex === -1) return a.localeCompare(b);
+                    if (aIndex === -1) return 1;
+                    if (bIndex === -1) return -1;
+                    return aIndex - bIndex;
                 });
                 
-                sortedCategories.forEach(category => {
+                categoriesArray.forEach(category => {
                     const unreadCount = getUnreadCount(category);
                     if (showOnlyUnread && unreadCount === 0) {
                         return;
@@ -462,10 +495,13 @@
                     const isFavorite = favoriteCategories.has(category);
                     categoriesHtml += `
                         <div class="category-filter" data-category="${escapedCategory}">
-                            <span class="star-icon ${isFavorite ? 'favorite' : ''}" data-category="${escapedCategory}">
-                                ${isFavorite ? '★' : '☆'}
-                            </span>
-                            <span class="category-name">${escapedCategory}</span>
+                            <div class="d-flex flex-items-center flex-grow">
+                                <span class="drag-handle">⋮⋮</span>
+                                <span class="star-icon ${isFavorite ? 'favorite' : ''}" data-category="${escapedCategory}">
+                                    ${isFavorite ? '★' : '☆'}
+                                </span>
+                                <span class="category-name">${escapedCategory}</span>
+                            </div>
                             <span class="category-count">${unreadCount}</span>
                         </div>
                     `;
@@ -473,6 +509,39 @@
                 
                 $('#categories-list').html(categoriesHtml);
                 updateTotalUnreadCount();
+                
+                // Initialize Sortable after HTML is updated
+                setTimeout(initializeSortable, 0);
+            }
+
+            function initializeSortable() {
+                const categoriesList = document.getElementById('categories-list');
+                if (categoriesList) {
+                    // Destroy existing instance if it exists
+                    const existingInstance = Sortable.get(categoriesList);
+                    if (existingInstance) {
+                        existingInstance.destroy();
+                    }
+
+                    new Sortable(categoriesList, {
+                        animation: 150,
+                        ghostClass: 'sortable-ghost',
+                        dragClass: 'sortable-drag',
+                        handle: '.drag-handle',
+                        forceFallback: false,
+                        onEnd: function(evt) {
+                            // Update stored order
+                            const newOrder = Array.from(evt.to.children).map(
+                                el => decodeHtml(el.dataset.category)
+                            );
+                            categoryOrder = newOrder;
+                            localStorage.setItem('categoryOrder', JSON.stringify(categoryOrder));
+                            
+                            // Optional: Update UI to reflect new order
+                            updateCategoryFilters();
+                        }
+                    });
+                }
             }
 
             function filterArticles(category) {
@@ -541,16 +610,15 @@
                     $('#loading').hide();
                     allArticles = response.data;
                     
-                    // Sort all articles by date when initially loading
-                    allArticles.sort((a, b) => {
-                        const dateA = new Date(a.optimized_at || 0);
-                        const dateB = new Date(b.optimized_at || 0);
-                        return dateB - dateA;
-                    });
-                    
                     allArticles.forEach(article => {
                         categories.add(article.category);
                     });
+                    
+                    // Initialize category order if empty
+                    if (categoryOrder.length === 0) {
+                        categoryOrder = Array.from(categories);
+                        localStorage.setItem('categoryOrder', JSON.stringify(categoryOrder));
+                    }
                     
                     updateCategoryFilters();
                     $('#articles').html('');
