@@ -168,7 +168,7 @@
         /* Add these styles */
         .Box-title {
             font-size: 1.25rem;
-            font-weight: 600;
+            font-weight: 400;
             color: #24292f;
         }
 
@@ -255,6 +255,26 @@
         .border-green {
             border: 2px solid #2ea44f !important;
         }
+
+        /* Update article title styles */
+        .Box-title {
+            font-size: 1.25rem;
+            font-weight: 400;
+            color: #24292f;
+        }
+
+        /* Make article links consistent with the new weight */
+        .article-box .Box-title a {
+            font-weight: 400;
+            color: #24292f;
+        }
+
+        /* Optional: Add slight emphasis on hover */
+        .article-box .Box-title a:hover {
+            font-weight: 500;
+            color: #2ea44f;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body class="container-lg px-3 py-5">
@@ -290,7 +310,7 @@
         <div class="content">
             <div class="Box">
                 <div class="Box-header d-flex flex-items-center">
-                    <h2 class="Box-title flex-auto">RSS Articles</h2>
+                    <h2 class="Box-title flex-auto" id="content-header">RSS Articles</h2>
                     <div class="d-flex flex-items-center">
                         <div class="BtnGroup mr-3" role="group" aria-label="Sort articles">
                             <button class="BtnGroup-item btn btn-sm selected" data-sort="newest" title="Newest first">
@@ -467,7 +487,10 @@
             $(document).on('click', '.category-filter', function() {
                 $('.category-filter').removeClass('active');
                 $(this).addClass('active');
-                filterArticles($(this).data('category'));
+                const category = $(this).data('category');
+                // Update the header text with the selected category
+                $('#content-header').text(decodeHtml(category));
+                filterArticles(category);
             });
 
             // Add click handlers for marking as read
@@ -500,6 +523,7 @@
                 localStorage.removeItem('readArticles');
                 $('.article-box').removeClass('read');
                 updateCategoryFilters();
+                resetContentHeader();  // Reset header when clearing history
             });
 
             // Update the toggle handler
@@ -711,6 +735,11 @@
                 renderArticles(sortedArticles);
                 updateVisibleArticles();
             });
+
+            // Reset header text when clearing filters or initializing
+            function resetContentHeader() {
+                $('#content-header').text('RSS Articles');
+            }
         });
     </script>
 </body>
